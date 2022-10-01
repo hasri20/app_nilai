@@ -16,7 +16,7 @@ export default function Index({ auth, students }) {
 
     const submit = (e) => {
         e.preventDefault();
-        post(route("students.store"), { onSuccess: () => reset() });
+        post(route("student.store"), { onSuccess: () => reset() });
     };
 
     return (

@@ -37,6 +37,6 @@ class StudentController extends Controller
 
         $student->save();
  
-        return redirect(route('students.index'));
+        return redirect(route('student.index'));
     }
 }

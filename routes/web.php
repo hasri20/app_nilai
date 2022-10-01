@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 use App\Http\Controllers\StudentController;
+
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -29,10 +31,8 @@ Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-
-Route::resource('students', StudentController::class)
+Route::resource('student', StudentController::class)
     ->only(['index', 'store'])
-    ->middleware(['auth']);
-
+    ->middleware(['auth', 'verified']);
 
 require __DIR__.'/auth.php';
