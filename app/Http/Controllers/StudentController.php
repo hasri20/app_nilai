@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Student;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-
-use App\Models\Student;
-
 
 class StudentController extends Controller
 {
@@ -28,6 +26,7 @@ class StudentController extends Controller
  
         $student = new Student;
 
+        $student->first_name = $request->firstName;
         $student->first_name = $request->firstName;
         $student->last_name = $request->lastName;
         $student->sex = $request->sex;

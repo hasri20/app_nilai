@@ -10,4 +10,9 @@ class Student extends Model
 {
     use HasUuids;
     use HasFactory;
+
+    public function scores()
+    {
+        return $this->hasMany(Score::class);
+    }
 }

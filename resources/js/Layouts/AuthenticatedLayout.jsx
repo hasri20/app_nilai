@@ -34,6 +34,12 @@ export default function Authenticated({ auth, header, children }) {
                                 >
                                     Student
                                 </NavLink>
+                                <NavLink
+                                    href={route("score.index")}
+                                    active={route().current("score.index")}
+                                >
+                                    Score
+                                </NavLink>
                             </div>
                         </div>
 
@@ -138,6 +144,12 @@ export default function Authenticated({ auth, header, children }) {
                             active={route().current("student.index")}
                         >
                             Student
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            href={route("score.index")}
+                            active={route().current("score.index")}
+                        >
+                            Score
                         </ResponsiveNavLink>
                     </div>
 
