@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useLayoutEffect } from "react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import PrimaryButton from "@/Components/PrimaryButton";
 import { useForm } from "@inertiajs/inertia-react";
 import { Head } from "@inertiajs/inertia-react";
+import * as am5 from "@amcharts/amcharts5";
+import * as am5percent from "@amcharts/amcharts5/percent";
 
 const calculateGrade = (score) => {
     if (score >= 85) {
@@ -48,10 +50,96 @@ export default function Index(props) {
         semester_period: "",
     });
 
+    const scores = props.scores.map((score) => {
+        const totalScore = calculateScore({
+            quizScore: score.quiz_score,
+            assesmentScore: score.assessment_score,
+            attendanceScore: score.attendance_score,
+            practiceScore: score.practice_score,
+            semesterScore: score.semester_score,
+        });
+        const grade = calculateGrade(totalScore);
+
+        return {
+            ...score,
+            totalScore,
+            grade,
+        };
+    });
+
     const submit = (e) => {
         e.preventDefault();
         post(route("score.store"), { onSuccess: () => reset() });
     };
+
+    useLayoutEffect(() => {
+        const root = am5.Root.new("chartdiv");
+
+        let chart = root.container.children.push(
+            am5percent.PieChart.new(root, {})
+        );
+
+        let series = chart.series.push(
+            am5percent.PieSeries.new(root, {
+                name: "Grade Percentage",
+                categoryField: "grade",
+                valueField: "count",
+                legendLabelText: "[{fill}]{category}[/]",
+                legendValueText: "[{fill}]{value}[/]",
+            })
+        );
+
+        let gradeA = 0;
+        let gradeB = 0;
+        let gradeC = 0;
+        let gradeD = 0;
+
+        for (const score of scores) {
+            if (score.grade === "A") {
+                gradeA += 1;
+            } else if (score.grade === "B") {
+                gradeB += 1;
+            } else if (score.grade === "C") {
+                gradeC += 1;
+            } else if (score.grade === "D") {
+                gradeD += 1;
+            }
+        }
+
+        const data = [
+            {
+                grade: "A",
+                count: gradeA,
+            },
+            {
+                grade: "B",
+                count: gradeB,
+            },
+            {
+                grade: "C",
+                count: gradeC,
+            },
+            {
+                grade: "D",
+                count: gradeD,
+            },
+        ];
+
+        series.data.setAll(data);
+
+        let legend = chart.children.push(
+            am5.Legend.new(root, {
+                centerX: am5.percent(50),
+                x: am5.percent(50),
+                layout: root.horizontalLayout,
+            })
+        );
+
+        legend.data.setAll(series.dataItems);
+        return () => {
+            root.dispose();
+        };
+    }, []);
 
     return (
         <AuthenticatedLayout
@@ -67,6 +155,17 @@ export default function Index(props) {
 
             <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 pt-12">
                 <div className="overflow-x-auto relative p-6 bg-white border-b border-gray-200">
+                    <h1 className="text-2xl font-bold mb-4">Grade Chart</h1>
+                    <div
+                        id="chartdiv"
+                        style={{ width: "100%", height: "500px" }}
+                    ></div>
+                </div>
+            </div>
+
+            <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 pt-12">
+                <div className="overflow-x-auto relative p-6 bg-white border-b border-gray-200">
+                    <h1 className="text-2xl font-bold mb-4">Score Table</h1>
                     <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                         <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                             <tr>
@@ -100,7 +199,7 @@ export default function Index(props) {
                             </tr>
                         </thead>
                         <tbody>
-                            {props.scores.map((score) => {
+                            {scores.map((score) => {
                                 return (
                                     <tr
                                         className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
@@ -128,43 +227,26 @@ export default function Index(props) {
                                             {score.semester_period}
                                         </td>
                                         <td className="py-4 px-6">
-                                            {calculateScore({
-                                                quizScore: score.quiz_score,
-                                                assesmentScore:
-                                                    score.assessment_score,
-                                                attendanceScore:
-                                                    score.attendance_score,
-                                                practiceScore:
-                                                    score.practice_score,
-                                                semesterScore:
-                                                    score.semester_score,
-                                            })}
+                                            {score.totalScore}
                                         </td>
                                         <td className="py-4 px-6">
-                                            {calculateGrade(
-                                                calculateScore({
-                                                    quizScore: score.quiz_score,
-                                                    assesmentScore:
-                                                        score.assessment_score,
-                                                    attendanceScore:
-                                                        score.attendance_score,
-                                                    practiceScore:
-                                                        score.practice_score,
-                                                    semesterScore:
-                                                        score.semester_score,
-                                                })
-                                            )}
+                                            {score.grade}
                                         </td>
                                     </tr>
                                 );
                             })}
                         </tbody>
                     </table>
+                    <p>
+                        Bobot nilai: Quiz 25%, Assessment 10%, Attendance 10%,
+                        Practice 15%, Semester Exam 40%
+                    </p>
                 </div>
             </div>
 
             <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 pt-12">
                 <div className="p-6 bg-white border-b border-gray-200">
+                    <h1 className="text-2xl font-bold mb-4">Insert Score</h1>
                     <form onSubmit={submit}>
                         <div className="grid gap-6 mb-6">
                             <div>
